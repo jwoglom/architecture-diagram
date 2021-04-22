@@ -1,0 +1,70 @@
+graph TD
+    subgraph "On-Body"
+        subgraph "On-Body Sensors"
+            CGM(Dexcom G6 CGM)
+            PUMP(Tandem t:slim X2 Pump)
+
+            CGM ==>|"CGM data<br>(via BT)"| PUMP
+        end
+
+        subgraph Phone
+            XDRIP[xDrip App]
+            TCONNECTANDROID[t:connect App]
+            click XDRIP "http://github.com/nightscoutfoundation/xdrip"
+
+            CGM ===>|"CGM data<br>(via BT)"| XDRIP
+            
+
+            PUMP ==>|"Pump data<br>(via BT)"| TCONNECTANDROID
+        end
+
+
+        subgraph Pebble
+            PEBBLE["Urchin watchface"]
+            click PEBBLE "https://github.com/jwoglom/urchin-cgm"
+            XDRIP -.->|HTTP Web Service| PEBBLE
+        end
+    end
+
+    subgraph Internet
+        TCONNECTPORTAL{{t:connect Portal}}
+        click TCONNECTPORTAL "https://tconnect.tandemdiabetes.com/"
+
+        TCONNECTANDROID ==>|t:connect upload| TCONNECTPORTAL
+    end
+
+    subgraph Self-Hosted
+        NIGHTSCOUT{{Nightscout}}
+        TCONNECTSYNC[tconnectsync]
+        click NIGHTSCOUT "https://github.com/nightscout/cgm-remote-monitor"
+        click TCONNECTSYNC "https://github.com/jwoglom/tconnectsync"
+
+        XDRIP ==>|CGM data upload| NIGHTSCOUT
+
+        TCONNECTPORTAL -.->|Downloads pump data| TCONNECTSYNC
+        TCONNECTSYNC ==>|Pump data upload| NIGHTSCOUT
+    end
+
+    subgraph "Other Devices"
+        subgraph Laptop
+            TOUCHBAR[Touchbar Widget]
+            UBERSICHT[Ubersicht Widget]
+
+            click UBERSICHT "https://github.com/jwoglom/nibar"
+
+            NIGHTSCOUT -.-> TOUCHBAR
+            NIGHTSCOUT -.-> UBERSICHT
+        end
+
+        SCOUT[Scout Web UI]
+        STATUSBOARD[Statusboard Widget]
+
+        click SCOUT "https://github.com/jwoglom/scout"
+        click STATUSBOARD "https://github.com/jwoglom/statusboard"
+
+        NIGHTSCOUT -.-> SCOUT
+        NIGHTSCOUT -.-> STATUSBOARD
+
+        PEBBLE -.->|Pump data| NIGHTSCOUT
+    end
+    
