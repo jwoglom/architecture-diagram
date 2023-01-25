@@ -1,28 +1,46 @@
 graph TD
     subgraph "On-Body"
-        subgraph "On-Body Sensors"
+        subgraph "On-Body Devices"
             CGM(Dexcom G6 CGM)
             PUMP(Tandem t:slim X2 Pump)
 
-            CGM ==>|"CGM data<br>(via BT)"| PUMP
+            CGM ==>|"CGM data<br>(Bluetooth)"| PUMP
         end
 
         subgraph Phone
             XDRIP[xDrip App]
             TCONNECTANDROID[t:connect App]
+            CONTROLX2[ControlX2 App]
             click XDRIP "http://github.com/nightscoutfoundation/xdrip"
+            click CONTROLX2 "http://github.com/jwoglom/controlX2"
 
-            CGM ===>|"CGM data<br>(via BT)"| XDRIP
+            CGM ===>|"CGM data<br>(Bluetooth)"| XDRIP
             
 
-            PUMP ==>|"Pump data<br>(via BT)"| TCONNECTANDROID
+            PUMP ==>|"Pump data<br>(Bluetooth)"| TCONNECTANDROID
+            PUMP <==>|"Pump data<br>and remote bolus<br>(Bluetooth)"| CONTROLX2
+        end
+
+        subgraph "Pixel Watch"
+            CONTROLX2WATCH["ControlX2 Watch App"]
+            CONTROLX2COMPLICATION["ControlX2 Watchface<br>Complication"]
+            XDRIPCOMPLICATION["G-Watch<br>Complication"]
+
+            click CONTROLX2WATCH "http://github.com/jwoglom/controlX2"
+            click CONTROLX2COMPLICATION "http://github.com/jwoglom/controlX2"
+            click XDRIPCOMPLICATION "https://play.google.com/store/apps/details?id=sk.trupici.gwatch.wear"
+
+            XDRIP -->|"CGM data"| XDRIPCOMPLICATION
+
+            CONTROLX2COMPLICATION -.->|Read current state| CONTROLX2WATCH
+            CONTROLX2 <-->|"Pump data<br>and remote bolus<br>(Bluetooth)"| CONTROLX2WATCH
         end
 
 
         subgraph Pebble
             PEBBLE["Urchin watchface"]
             click PEBBLE "https://github.com/jwoglom/urchin-cgm"
-            XDRIP -.->|HTTP Web Service| PEBBLE
+            XDRIP -->|CGM data via<br>HTTP Web Service| PEBBLE
         end
     end
 
@@ -41,19 +59,17 @@ graph TD
 
         XDRIP ==>|CGM data upload| NIGHTSCOUT
 
-        TCONNECTPORTAL -.->|Downloads pump data| TCONNECTSYNC
+        TCONNECTPORTAL ==>|Downloads pump data| TCONNECTSYNC
         TCONNECTSYNC ==>|Pump data upload| NIGHTSCOUT
     end
 
     subgraph "Other Devices"
         subgraph Laptop
-            TOUCHBAR[Touchbar Widget]
-            UBERSICHT[Ubersicht Widget]
+            CGMBAR[CGMBar MacOS<br>status bar icon]
 
-            click UBERSICHT "https://github.com/jwoglom/nibar"
+            click CGMBAR "https://github.com/jwoglom/cgmbar"
 
-            NIGHTSCOUT -.-> TOUCHBAR
-            NIGHTSCOUT -.-> UBERSICHT
+            NIGHTSCOUT -.-> CGMBAR
         end
 
         SCOUT[Scout Web UI]
@@ -65,6 +81,4 @@ graph TD
         NIGHTSCOUT -.-> SCOUT
         NIGHTSCOUT -.-> STATUSBOARD
 
-        PEBBLE -.->|Pump data| NIGHTSCOUT
     end
-    
