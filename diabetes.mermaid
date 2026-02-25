@@ -1,54 +1,50 @@
 graph TD
     subgraph "On-Body"
         subgraph "On-Body Devices"
+            PUMP(Tandem Mobi Pump)
             CGM(Dexcom G7 CGM)
-            PUMP(Tandem t:slim X2 Pump)
 
             CGM ==>|"CGM data<br>(Bluetooth)"| PUMP
         end
 
-        subgraph Phone
-            XDRIP[xDrip App]
-            TCONNECTANDROID[t:connect App]
-            CONTROLX2[ControlX2 App]
-            click XDRIP "http://github.com/nightscoutfoundation/xdrip"
-            click CONTROLX2 "http://github.com/jwoglom/controlX2"
 
-            CGM ===>|"CGM data<br>(Bluetooth)"| XDRIP
+        subgraph "iPhone"
+            DEXCOM_IOS["Dexcom G7<br>iOS App"]
+
+            TANDEM_MOBI_IOS[Tandem Mobi<br>iOS App]
+            
+            CGM ===>|"CGM data<br>(Phone)"| DEXCOM_IOS
+
+
+
+            PUMP ==>|"Pump data<br>(Bluetooth)"| TANDEM_MOBI_IOS
+
+            
             
 
-            PUMP ==>|"Pump data<br>(Bluetooth)"| TCONNECTANDROID
-            PUMP <==>|"Pump data<br>and remote bolus<br>(Bluetooth)"| CONTROLX2
         end
 
-        subgraph "Pixel Watch"
-            CONTROLX2WATCH["ControlX2 Watch App"]
-            CONTROLX2COMPLICATION["ControlX2 Watchface<br>Complication"]
-            XDRIPCOMPLICATION["G-Watch<br>Complication"]
+        subgraph "Apple Watch"
+            DEXCOM_APPLE_WATCH["Dexcom G7<br>Direct-to-Watch"]
 
-            click CONTROLX2WATCH "http://github.com/jwoglom/controlX2"
-            click CONTROLX2COMPLICATION "http://github.com/jwoglom/controlX2"
-            click XDRIPCOMPLICATION "https://play.google.com/store/apps/details?id=sk.trupici.gwatch.wear"
+            CGM ===>|"CGM data<br>(Phone)"| DEXCOM_APPLE_WATCH
 
-            XDRIP -->|"CGM data"| XDRIPCOMPLICATION
+            DEXCOM_IOS <==>|"Sync"| DEXCOM_APPLE_WATCH
 
-            CONTROLX2COMPLICATION -.->|Read current state| CONTROLX2WATCH
-            CONTROLX2 <-->|"Pump data<br>and remote bolus<br>(Bluetooth)"| CONTROLX2WATCH
         end
 
-
-        subgraph Pebble
-            PEBBLE["Urchin watchface"]
-            click PEBBLE "https://github.com/jwoglom/urchin-cgm"
-            XDRIP -->|CGM data via<br>HTTP Web Service| PEBBLE
-        end
     end
 
     subgraph Internet
-        TCONNECTPORTAL{{Tandem Source}}
-        click TCONNECTPORTAL "https://source.tandemdiabetes.com/"
+        DEXCOM_SHARE[Dexcom Share]
+        TANDEM_SOURCE[Tandem Source]
 
-        TCONNECTANDROID ==>|t:connect upload| TCONNECTPORTAL
+
+        DEXCOM_IOS ==>|"CGM data<br>(Cloud)"| DEXCOM_SHARE
+        DEXCOM_APPLE_WATCH ==>|"CGM data<br>(Cloud)"| DEXCOM_SHARE
+        TANDEM_MOBI_IOS ==>|"Pump data<br>(Cloud)"| TANDEM_SOURCE
+
+
     end
 
     subgraph Self-Hosted
@@ -57,9 +53,9 @@ graph TD
         click NIGHTSCOUT "https://github.com/nightscout/cgm-remote-monitor"
         click TCONNECTSYNC "https://github.com/jwoglom/tconnectsync"
 
-        XDRIP ==>|CGM data upload| NIGHTSCOUT
+        DEXCOM_SHARE ==>|CGM data upload| NIGHTSCOUT
 
-        TCONNECTPORTAL ==>|Downloads pump data| TCONNECTSYNC
+        TANDEM_SOURCE ==>|Downloads pump data| TCONNECTSYNC
         TCONNECTSYNC ==>|Pump data upload| NIGHTSCOUT
     end
 
